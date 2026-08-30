@@ -1,0 +1,8 @@
+# dsh-sidebar-gdhighlight bundle patch
+#
+# Adds GDScript syntax highlighting support to dsh-better-sidebar.
+# This plugin registers a CodeMirror StreamLanguage for GDScript
+# and hooks into the better-sidebar's file viewer system.
+- insert:
+    - id: gdscript-highlight
+      name: 'dsh-sidebar-gdhighlight'

@@ -1,0 +1,75 @@
+{
+  "name": "dsh-sidebar-gdhighlight",
+  "version": "0.1.0",
+  "description": "DSH plugin: GDScript syntax highlighting for dsh-better-sidebar CodeMirror editor",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lrplrplrp/dsh-sidebar-gdhighlight"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./gdscript": {
+      "types": "./lib/types/gdscript-lang.d.ts",
+      "default": "./lib/gdscript-lang.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-client-ui-slots": "^0.1.0-rc.8",
+    "dsh-better-sidebar": "^0.17.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "@codemirror/language": "^6.12.4",
+    "@lezer/highlight": "^1.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.1",
+    "cordis": "^4.0.0-rc.8",
+    "dsh-better-sidebar": "0.17.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('lib',{recursive:true,force:true})\" && tsc -p tsconfig.build.json && tsdown",
+    "typecheck": "tsc --noEmit",
+    "bundle": "tsdown",
+    "watch": "tsdown --watch"
+  },
+  "license": "MIT"
+}
