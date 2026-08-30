@@ -21,6 +21,14 @@
       "types": "./lib/gdscript-lang.d.ts",
       "default": "./lib/gdscript-lang.js"
     },
+    "./gdshader": {
+      "types": "./lib/gdshader-lang.d.ts",
+      "default": "./lib/gdshader-lang.js"
+    },
+    "./godot-theme": {
+      "types": "./lib/godot-theme.d.ts",
+      "default": "./lib/godot-theme.js"
+    },
     "./client": {
       "types": "./lib/client.d.ts",
       "default": "./lib/client.js"

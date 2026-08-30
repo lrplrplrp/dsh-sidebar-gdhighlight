@@ -1,8 +1,8 @@
 /**
  * dsh-sidebar-gdhighlight — client (browser) side.
  *
- * DSH plugin that adds GDScript syntax highlighting to dsh-better-sidebar.
- * Registers a custom file viewer for .gd files using CodeMirror with GDScript language.
+ * DSH plugin that adds GDScript & GDShader syntax highlighting to
+ * dsh-better-sidebar, using Godot 4.7 editor colors.
  *
  * The `betterSidebar` service is provided by dsh-better-sidebar's client
  * bundle, so this registration must run in the browser (see the `./client`
@@ -14,35 +14,46 @@ import type { FileViewerProps } from 'dsh-better-sidebar'
 import { EditorState } from '@codemirror/state'
 import { EditorView, lineNumbers, keymap } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
-import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
+import { syntaxHighlighting } from '@codemirror/language'
+import { godotHighlightStyle, godotEditorTheme } from './godot-theme.js'
 import { gdscript } from './gdscript-lang.js'
+import { gdshader } from './gdshader-lang.js'
 
 export const name = 'dsh-sidebar-gdhighlight'
 
 export const inject = ['betterSidebar']
 
-/**
- * GDScript code editor component for CodeMirror 6
- */
-function GdScriptEditor({ content, path, scope }: FileViewerProps) {
+// ── Shared CodeMirror extensions for both GDScript & GDShader ──────────
+const baseExtensions = [
+  EditorView.lineWrapping,
+  lineNumbers(),
+  history(),
+  EditorState.tabSize.of(4),
+  EditorView.contentAttributes.of({ spellcheck: 'false' }),
+  syntaxHighlighting(godotHighlightStyle),
+  godotEditorTheme,
+  keymap.of([...defaultKeymap, ...historyKeymap]),
+]
+
+// ── Reusable CodeMirror editor component ────────────────────────────────
+function CodeEditor({ content, path, lang }: FileViewerProps & { lang: () => any }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
 
   useEffect(() => {
     if (!content || !hostRef.current) return
 
-    // Create CodeMirror editor with GDScript language
+    // Destroy previous view
+    if (viewRef.current) {
+      viewRef.current.destroy()
+      viewRef.current = null
+    }
+
     const state = EditorState.create({
       doc: content,
       extensions: [
-        EditorView.lineWrapping,
-        lineNumbers(),
-        history(),
-        EditorState.tabSize.of(4),
-        EditorView.contentAttributes.of({ spellcheck: 'false' }),
-        gdscript(), // GDScript language support
-        syntaxHighlighting(defaultHighlightStyle), // Apply syntax coloring
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        ...baseExtensions,
+        lang(), // gdscript() or gdshader()
       ],
     })
 
@@ -74,27 +85,50 @@ function GdScriptEditor({ content, path, scope }: FileViewerProps) {
   )
 }
 
+// ── GDScript editor ─────────────────────────────────────────────────────
+function GdScriptEditor(props: FileViewerProps) {
+  return <CodeEditor {...props} lang={gdscript} />
+}
+
+// ── GDShader editor ─────────────────────────────────────────────────────
+function GdShaderEditor(props: FileViewerProps) {
+  return <CodeEditor {...props} lang={gdshader} />
+}
+
 /**
  * Plugin entry point.
- * Registers GDScript file viewer with dsh-better-sidebar.
+ * Registers GDScript & GDShader file viewers with dsh-better-sidebar.
  */
 export function apply(ctx: Context) {
   ctx.effect(() => {
-    // Register GDScript file viewer with better-sidebar
-    // This will handle .gd files with syntax highlighting
-    const disposer = ctx.betterSidebar.registerFileViewer({
+    // ── GDScript viewer ──────────────────────────────────────
+    const disposeGd = ctx.betterSidebar.registerFileViewer({
       id: 'dsh-sidebar-gdhighlight:gdscript',
       title: 'GDScript',
       exts: ['gd'],
-      priority: 10, // Higher priority than the catch-all 'code' viewer (-100)
-      fetchStrategy: 'fsRead', // GDScript files are text, read from the filesystem
+      priority: 10,
+      fetchStrategy: 'fsRead',
       component: GdScriptEditor,
     })
 
-    console.log('[dsh-sidebar-gdhighlight] GDScript language support registered')
+    // ── GDShader viewer ──────────────────────────────────────
+    const disposeShader = ctx.betterSidebar.registerFileViewer({
+      id: 'dsh-sidebar-gdhighlight:gdshader',
+      title: 'GDShader',
+      exts: ['gdshader', 'shader'],
+      priority: 10,
+      fetchStrategy: 'fsRead',
+      component: GdShaderEditor,
+    })
 
-    return disposer
+    console.log('[dsh-sidebar-gdhighlight] GDScript + GDShader language support registered')
+
+    return () => {
+      disposeGd()
+      disposeShader()
+    }
   })
 }
 
 export { gdscript, isGdScript, GDSCRIPT_EXTENSIONS } from './gdscript-lang.js'
+export { gdshader, isGdShader, GDSHADER_EXTENSIONS } from './gdshader-lang.js'

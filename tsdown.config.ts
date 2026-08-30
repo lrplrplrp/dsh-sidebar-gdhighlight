@@ -5,7 +5,8 @@ const PKG = 'dsh-sidebar-gdhighlight'
 /**
  * Two different module worlds, two builds:
  *
- * - host  (`lib/index.js`, `lib/gdscript-lang.js`): plain ESM for Node.
+ * - host  (`lib/index.js`, `lib/gdscript-lang.js`, `lib/gdshader-lang.js`, `lib/godot-theme.js`):
+ *   plain ESM for Node.
  * - client(`lib/client.js`): a CJS factory wrapped in
  *   `window.__ModuleLoader__.load({ id, factory })`, which is the registration
  *   contract dsh-client-modules requires — a bundle that is fetched but never
@@ -20,6 +21,8 @@ export default defineConfig([
     entry: {
       index: 'src/index.ts',
       'gdscript-lang': 'src/gdscript-lang.ts',
+      'gdshader-lang': 'src/gdshader-lang.ts',
+      'godot-theme': 'src/godot-theme.ts',
     },
     outDir: 'lib',
     format: ['esm'],
