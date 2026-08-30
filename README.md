@@ -1,5 +1,7 @@
 # dsh-sidebar-gdhighlight
 
+[简体中文](README.zh.md) | English
+
 DSH plugin: GDScript syntax highlighting for [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar).
 
 [![npm version](https://img.shields.io/npm/v/dsh-sidebar-gdhighlight)](https://www.npmjs.com/package/dsh-sidebar-gdhighlight)

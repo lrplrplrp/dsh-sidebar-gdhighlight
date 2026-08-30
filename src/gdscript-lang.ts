@@ -4,7 +4,7 @@
  * Based on Godot 4.x GDScript syntax.
  * Uses StreamLanguage for simple token-based highlighting.
  */
-import { StreamLanguage, type StreamParser, type StreamParseContext } from '@codemirror/language'
+import { type IndentContext, StreamLanguage, StringStream, type StreamParser } from '@codemirror/language'
 
 /** GDScript token styles mapped to CodeMirror highlight classes */
 const GdScriptStyles: Record<string, string> = {
@@ -362,7 +362,7 @@ const gdscriptDefinition: StreamParser<GdScriptState> = {
     return null
   },
 
-  indent(state: GdScriptState, textAfter: string, context: StreamParseContext): number {
+  indent(state: GdScriptState, textAfter: string, context: IndentContext): number {
     // Simple indentation: increase after ':', decrease after dedent keywords
     const indentUnit = 4
 
@@ -389,7 +389,7 @@ const gdscriptDefinition: StreamParser<GdScriptState> = {
  * GDScript language support for CodeMirror 6
  */
 export function gdscript() {
-  return new StreamLanguage(gdscriptDefinition)
+  return StreamLanguage.define(gdscriptDefinition)
 }
 
 /**

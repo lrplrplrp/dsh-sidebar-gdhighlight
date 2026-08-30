@@ -11,15 +11,19 @@
     "access": "public"
   },
   "main": "lib/index.js",
-  "types": "lib/types/index.d.ts",
+  "types": "lib/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/types/index.d.ts",
+      "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
     "./gdscript": {
-      "types": "./lib/types/gdscript-lang.d.ts",
+      "types": "./lib/gdscript-lang.d.ts",
       "default": "./lib/gdscript-lang.js"
+    },
+    "./client": {
+      "types": "./lib/client.d.ts",
+      "default": "./lib/client.js"
     },
     "./package.json": "./package.json"
   },
@@ -38,7 +42,11 @@
     "client": {
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-client-ui-slots"
+        "@deepseek-ai/dsh-client-ui-slots",
+        "dsh-better-sidebar"
+      ],
+      "external": [
+        "dsh-better-sidebar"
       ],
       "platform": "web"
     }
@@ -51,7 +59,10 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.11.0",
     "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.9",
     "@lezer/highlight": "^1.2.3"
   },
   "devDependencies": {

@@ -1,5 +1,7 @@
 # dsh-sidebar-gdhighlight
 
+简体中文 | [English](README.md)
+
 DSH 插件：为 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-sidebar) 提供 GDScript 语法高亮支持。
 
 [![npm version](https://img.shields.io/npm/v/dsh-sidebar-gdhighlight)](https://www.npmjs.com/package/dsh-sidebar-gdhighlight)
