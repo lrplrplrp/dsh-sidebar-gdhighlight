@@ -71,7 +71,9 @@ export const godotHighlightStyle = HighlightStyle.define([
 
   // ── Functions ─────────────────────────────────────────────
   { tag: tags.function(tags.name),    color: godot.function },
-  { tag: tags.function(tags.definition), color: godot.functionDefinition },
+  // `definition` 是 modifier（不是 Tag），必须作用于一个 Tag，否则
+  // Tag.defineModifier 的闭包会拿 undefined 去读 .modified 而崩溃。
+  { tag: tags.function(tags.definition(tags.name)), color: godot.functionDefinition },
 
   // ── Literals & constants ──────────────────────────────────
   { tag: tags.atom,                   color: godot.number },
@@ -93,8 +95,8 @@ export const godotHighlightStyle = HighlightStyle.define([
   // ── Operators & punctuation ───────────────────────────────
   { tag: tags.operator,              color: godot.symbol },
   { tag: tags.punctuation,           color: godot.symbol },
-  { tag: tags.derefOp,               color: godot.symbol },
-  { tag: tags.operatorModifier,     color: godot.symbol },
+  { tag: tags.derefOperator,         color: godot.symbol },
+  { tag: tags.arithmeticOperator,    color: godot.symbol },
 
   // ── Annotations / meta ────────────────────────────────────
   { tag: tags.annotation,            color: godot.annotation },
@@ -112,13 +114,15 @@ export const godotHighlightStyle = HighlightStyle.define([
 ])
 
 /**
- * EditorView theme overrides to match Godot's dark editor appearance.
+ * EditorView theme overrides.
+ *
+ * We intentionally do NOT set backgroundColor on '&' or '.cm-gutters' —
+ * those should inherit from the current DSH / better-sidebar theme so the
+ * editor blends in seamlessly.  We only tweak selection, cursor, active-line,
+ * and bracket-matching colors to stay close to Godot's look.
  */
 export const godotEditorTheme = EditorView.theme({
-  '&': {
-    backgroundColor: godot.background,
-    color: godot.text,
-  },
+  // Let the parent theme's background show through (no backgroundColor here).
   '&.cm-focused .cm-cursor': {
     borderLeftColor: godot.caret,
   },
@@ -132,7 +136,8 @@ export const godotEditorTheme = EditorView.theme({
     backgroundColor: godot.currentLine,
   },
   '.cm-gutters': {
-    backgroundColor: godot.background,
+    // transparent so the sidebar background shows through
+    backgroundColor: 'transparent',
     color: godot.lineNumber,
     border: 'none',
   },
