@@ -9,7 +9,7 @@ DSH plugin: GDScript & GDShader syntax highlighting for [dsh-better-sidebar](htt
 
 ## ✨ Features
 
-- **GDScript 4.x** full syntax highlighting (`.gd` files)
+- **GDScript 4.x** full syntax highlighting (`.gd` files, `.inc` include files)
 - **GDShader** shader syntax highlighting (`.gdshader` / `.shader` files)
 - **Godot 4.7 editor colors** — colors extracted from `editor_settings-4.7.tres`
 - CodeMirror 6 integration with dsh-better-sidebar
@@ -102,7 +102,7 @@ pnpm watch
 
 ## 📝 Supported Syntax
 
-### GDScript (`.gd`)
+### GDScript (`.gd` / `.inc`)
 
 | Element | Examples |
 |---------|----------|

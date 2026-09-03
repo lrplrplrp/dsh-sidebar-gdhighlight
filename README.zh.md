@@ -9,7 +9,7 @@ DSH 插件：为 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-si
 
 ## ✨ 功能特性
 
-- **GDScript 4.x** 完整语法高亮（`.gd` 文件）
+- **GDScript 4.x** 完整语法高亮（`.gd` 文件、`.inc` 包含文件）
 - **GDShader** 着色器语法高亮（`.gdshader` / `.shader` 文件）
 - **Godot 4.7 编辑器配色** — 直接从 `editor_settings-4.7.tres` 提取颜色
 - CodeMirror 6 集成 dsh-better-sidebar
@@ -102,7 +102,7 @@ pnpm watch
 
 ## 📝 支持的语法
 
-### GDScript (`.gd`)
+### GDScript (`.gd` / `.inc`)
 
 | 元素 | 示例 |
 |------|------|

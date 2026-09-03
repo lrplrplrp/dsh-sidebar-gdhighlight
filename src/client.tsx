@@ -105,7 +105,7 @@ export function apply(ctx: Context) {
     const disposeGd = ctx.betterSidebar.registerFileViewer({
       id: 'dsh-sidebar-gdhighlight:gdscript',
       title: 'GDScript',
-      exts: ['gd'],
+      exts: ['gd', 'inc'],
       priority: 10,
       fetchStrategy: 'fsRead',
       component: GdScriptEditor,

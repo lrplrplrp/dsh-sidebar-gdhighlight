@@ -441,13 +441,14 @@ export function gdscript() {
   return StreamLanguage.define(gdscriptDefinition)
 }
 
-/** File extensions that should use GDScript highlighting */
-export const GDSCRIPT_EXTENSIONS = ['gd']
+/** File extensions that should use GDScript highlighting
+ *  ('.inc' files are Godot include files containing GDScript code) */
+export const GDSCRIPT_EXTENSIONS = ['gd', 'inc']
 
 /** Check if a file path should use GDScript highlighting */
 export function isGdScript(path: string): boolean {
   const ext = path.split('.').pop()?.toLowerCase()
-  return ext === 'gd'
+  return ext === 'gd' || ext === 'inc'
 }
 
 export default gdscript
