@@ -15,22 +15,27 @@ import { tags as t } from '@lezer/highlight'
 // ── Token type names (mapped via tokenTable → @lezer/highlight Tags) ──
 
 // ── GDScript keywords ──────────────────────────────────────────────────
+// Structural / declaration keywords (keyword_color in Godot)
 const KEYWORDS = new Set([
   // Declarations
   'func', 'class', 'class_name', 'extends', 'var', 'const', 'static',
   'signal', 'enum', 'preload', 'load', 'export',
-  // Imports
-  'as',
+  // Imports / aliases
+  'as', 'import',
   // OOP
   'super', 'self',
   // Godot 4.x keywords
-  'await', 'void',
+  'await', 'yield', 'void', 'breakpoint',
+  // Property access / groups
+  'group', 'subgroup',
 ])
 
+// Control flow / operator keywords (control_flow_keyword_color in Godot)
 const CONTROL_KEYWORDS = new Set([
   'if', 'elif', 'else', 'for', 'while', 'match', 'in',
   'return', 'break', 'continue', 'pass',
   'not', 'and', 'or', 'is',
+  'assert',
 ])
 
 // ── GDScript types ─────────────────────────────────────────────────────
@@ -142,20 +147,36 @@ const BUILTINS = new Set([
   'preloads',
 ])
 
-// ── Godot constants ────────────────────────────────────────────────────
+// ── Godot constants & global singletons ────────────────────────────────
 const CONSTANTS = new Set([
-  'true', 'false', 'null', 'PI', 'TAU', 'INF', 'NAN',
+  'true', 'false', 'null',
+  // Math constants
+  'PI', 'TAU', 'HALF_PI', 'INF', 'NAN', 'NAN_POSITIVE', 'NAN_NEGATIVE',
+  // Error codes
+  'OK', 'FAILED', 'ERR_*', 'ERR',
+  // Key constants are matched via the KEY_* wildcard below
   'KEY_*', 'JOY_*', 'MOUSE_*', 'BUTTON_*',
-  'OK', 'FAILED', 'ERR_*',
   'UP', 'DOWN', 'LEFT', 'RIGHT',
-  'HALF_PI', 'TAU',
 ])
 
 // ── GDScript annotations ───────────────────────────────────────────────
+// Godot 4.x annotations (@export, @onready, @tool, …). Stored without the
+// leading '@' — the token() function strips it before matching.
 const ANNOTATIONS = new Set([
-  'export', 'onready', 'tool', 'icon', 'class_name', 'extends',
-  'warning_ignore', 'deprecated',
-  'master', 'puppet', 'remotesync', 'remote', 'puppetsync',
+  // Export-related
+  'export', 'export_category', 'export_color_no_alpha', 'export_custom',
+  'export_dir', 'export_enum', 'export_exp_easing', 'export_file',
+  'export_flags', 'export_flags_2d_navigation', 'export_flags_2d_physics',
+  'export_flags_2d_render', 'export_flags_3d_navigation', 'export_flags_3d_physics',
+  'export_flags_3d_render', 'export_global_dir', 'export_global_file',
+  'export_group', 'export_multiline', 'export_node_path', 'export_placeholder',
+  'export_range', 'export_storage', 'export_subgroup',
+  // Node lifecycle
+  'onready', 'tool', 'icon',
+  // Networking / RPC
+  'rpc', 'master', 'puppet', 'remotesync', 'remote', 'puppetsync',
+  // Meta
+  'warning_ignore', 'deprecated', 'static_unload', 'script_meta',
 ])
 
 // ── Parser state ───────────────────────────────────────────────────────
@@ -174,6 +195,9 @@ interface GdScriptState {
   inInterpolation: boolean
   /** Nesting depth of interpolation braces */
   interpolationDepth: number
+  /** Set to the declaration keyword (func/class/var/const/signal/enum) when
+   *  the previous token declared a name — the next identifier is a definition. */
+  pendingDecl: string
 }
 
 const gdscriptDefinition: StreamParser<GdScriptState> = {
@@ -186,6 +210,7 @@ const gdscriptDefinition: StreamParser<GdScriptState> = {
       inMultilineComment: false,
       inInterpolation: false,
       interpolationDepth: 0,
+      pendingDecl: '',
     }
   },
 
@@ -353,29 +378,57 @@ const gdscriptDefinition: StreamParser<GdScriptState> = {
       const word = stream.current()
 
       // Control flow keywords (distinct color in Godot)
-      if (CONTROL_KEYWORDS.has(word)) return 'controlKeyword'
+      if (CONTROL_KEYWORDS.has(word)) {
+        state.pendingDecl = ''
+        return 'controlKeyword'
+      }
 
       // Declaration keywords
-      if (KEYWORDS.has(word)) return 'keyword'
+      if (KEYWORDS.has(word)) {
+        // A name-declaring keyword makes the next identifier a definition
+        state.pendingDecl = /^(func|class|class_name|var|const|signal|enum)$/.test(word) ? word : ''
+        return 'keyword'
+      }
 
-      // Godot constants (true, false, null, PI, ...)
-      if (CONSTANTS.has(word)) return 'atom'
+      // Godot constants (true, false, null, PI, TAU, INF, NAN, ...)
+      // Also matches wildcard groups: KEY_*, JOY_*, MOUSE_*, BUTTON_*, ERR_*
+      if (CONSTANTS.has(word) || /^(KEY|JOY|MOUSE|BUTTON|ERR)_[A-Z0-9_]+$/.test(word)) {
+        state.pendingDecl = ''
+        return 'atom'
+      }
 
       // Base types (int, float, String, Vector2, ...)
-      if (BASE_TYPES.has(word)) return 'typeName'
+      if (BASE_TYPES.has(word)) {
+        state.pendingDecl = ''
+        return 'typeName'
+      }
 
       // Engine types (Node, Sprite2D, Button, ...)
-      if (ENGINE_TYPES.has(word)) return 'className'
+      if (ENGINE_TYPES.has(word)) {
+        state.pendingDecl = ''
+        return 'className'
+      }
 
       // Built-in functions (print, get_tree, ...)
-      if (BUILTINS.has(word)) return 'builtin'
+      if (BUILTINS.has(word)) {
+        state.pendingDecl = ''
+        return 'builtin'
+      }
 
       // self keyword
-      if (word === 'self') return 'self'
+      if (word === 'self') {
+        state.pendingDecl = ''
+        return 'self'
+      }
+
+      // A name following func/class/var/const/signal/enum is a definition
+      if (state.pendingDecl) {
+        state.pendingDecl = ''
+        return 'def'
+      }
 
       // Check if followed by '(' → function call
       if (stream.peek() === '(') {
-        // Match, then return as variable (we'll highlight via tags)
         return 'function'
       }
 
@@ -431,6 +484,7 @@ const gdscriptDefinition: StreamParser<GdScriptState> = {
     comment:          t.lineComment,
     invalid:          t.invalid,
     property:         t.propertyName,
+    def:              t.definition(t.variableName),
   },
 }
 
