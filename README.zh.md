@@ -14,8 +14,9 @@ DSH 插件：为 [dsh-better-sidebar](https://github.com/omdsh-dev/DSH-better-si
 - **Godot 4.7 编辑器配色** — 直接从 `editor_settings-4.7.tres` 提取颜色
 - CodeMirror 6 集成 dsh-better-sidebar
 - 支持所有 GDScript 关键字、控制流、类型、内置函数和注解
-- 支持函数定义高亮（`func name()` 使用专门的定义颜色）
 - 支持多行字符串（`"""`）、字符串插值（`$"..."`）、节点路径（`$Node`、`%Unique`）、字符串名（`&"Name"`）
+- 支持函数/变量/信号/枚举定义高亮（`func name()` 使用专门的定义颜色）
+- **选区"添加到对话"** — 选中代码后弹出按钮，将选中内容以围栏代码块插入对话输入框
 - 支持 GDShader 的 `uniform`/`varying`、内置变量（`ALBEDO`、`VERTEX` 等）、GLSL 数学函数
 
 ## 🎨 Godot 配色映射

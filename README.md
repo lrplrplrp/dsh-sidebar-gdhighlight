@@ -14,8 +14,9 @@ DSH plugin: GDScript & GDShader syntax highlighting for [dsh-better-sidebar](htt
 - **Godot 4.7 editor colors** — colors extracted from `editor_settings-4.7.tres`
 - CodeMirror 6 integration with dsh-better-sidebar
 - Support for all GDScript keywords, control flow, types, built-in functions, and annotations
-- Function definition highlighting (`func name()` uses a dedicated definition color)
+- Function/variable/signal/enum definition highlighting (`func name()` uses a dedicated definition color)
 - Multi-line strings (`"""`), string interpolation (`$""`), node paths (`$Node`, `%Unique`), string names (`&"Name"`)
+- **Selection "add to conversation"** — a floating button appears on text selection to insert the selection as a fenced code block into the conversation composer
 - GDShader `uniform`/`varying`, built-in variables (`ALBEDO`, `VERTEX`, etc.), GLSL math functions
 
 ## 🎨 Godot Color Mapping
