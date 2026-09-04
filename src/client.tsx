@@ -122,12 +122,14 @@ function placeCaretAfter(expectedDraft: string, caretIndex: number): void {
 /** Append text to the session's composer draft at the live caret */
 function appendToDraft(ctx: Context, sessionId: string, text: string): boolean {
   try {
-    const actx = ctx.sessions.scope(sessionId)
-    if (actx === undefined) return false
+    const actx = (ctx.sessions as any)?.scope(sessionId)
+    if (actx === undefined) { console.warn('[dsh-sidebar-gdhighlight] no session scope for', sessionId); return false }
     const conversation = ctx.get('conversation') as any
-    if (!conversation) return false
-    const input = conversation.input.for(actx)
-    const draft = input.state.getSnapshot().draft as string
+    if (!conversation) { console.warn('[dsh-sidebar-gdhighlight] conversation service unavailable'); return false }
+    const input = conversation.input?.for(actx)
+    if (!input) { console.warn('[dsh-sidebar-gdhighlight] conversation input unavailable'); return false }
+    const draft = input.state?.getSnapshot()?.draft as string | undefined ?? ''
+    if (typeof input.setDraft !== 'function') { console.warn('[dsh-sidebar-gdhighlight] input.setDraft is not a function'); return false }
 
     // Splice text at caret, or append
     const caret = probeComposerCaret(draft)
@@ -237,7 +239,9 @@ function CodeEditorWithPopup({
   const cwd = scope?.cwd
 
   const handleCommit = useCallback((insert: string) => {
-    if (scope?.sessionId) appendToDraft(ctx, scope.sessionId, insert)
+    if (!scope?.sessionId) { console.warn('[dsh-sidebar-gdhighlight] no sessionId for draft insert'); return }
+    const ok = appendToDraft(ctx, scope.sessionId, insert)
+    if (!ok) console.warn('[dsh-sidebar-gdhighlight] appendToDraft failed — nothing added to conversation')
   }, [ctx, scope?.sessionId])
 
   const { popup, buttonRef, show, hide, commit } = useSelectionPopup(handleCommit)
@@ -399,7 +403,11 @@ export function apply(ctx: Context) {
       exts: ['gd', 'inc'],
       priority: 10,
       fetchStrategy: 'fsRead',
-      component: (props: FileViewerProps) => <GdScriptEditor {...props} ctx={ctx} />,
+      // Use the ctx that better-sidebar injects into viewer props (the DSH
+      // root context) — it has the `sessions` + `conversation` services
+      // resolved, which appendToDraft() needs. Do NOT override it with the
+      // plugin's own ctx.
+      component: GdScriptEditor,
     })
 
     const disposeShader = ctx.betterSidebar.registerFileViewer({
